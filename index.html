@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MiniApp de Prueba</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+    <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+        <h1 class="text-2xl font-bold mb-6 text-center text-gray-800">Formulario de Contacto</h1>
+        
+        <!-- Formulario para enviar datos -->
+        <form id="contactForm" class="space-y-4">
+            <div>
+                <label for="name" class="block text-sm font-medium text-gray-700">Nombre:</label>
+                <input type="text" id="name" name="name" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+            </div>
+            
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-700">Email:</label>
+                <input type="email" id="email" name="email" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+            </div>
+            
+            <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                Guardar Contacto
+            </button>
+        </form>
+
+        <!-- Mensaje de respuesta del servidor -->
+        <div id="responseMessage" class="mt-6 text-center text-sm"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById('contactForm');
+        const responseMessage = document.getElementById('responseMessage');
+
+        form.addEventListener('submit', async (event) => {
+            // Prevenir el comportamiento por defecto del formulario (recargar la página)
+            event.preventDefault();
+
+            // Obtener los datos del formulario
+            const formData = new FormData(form);
+            const data = {
+                name: formData.get('name'),
+                email: formData.get('email')
+            };
+
+            // Mostrar un mensaje de carga
+            responseMessage.textContent = 'Enviando...';
+            responseMessage.className = 'text-gray-600';
+
+            try {
+                // Enviar los datos al backend usando fetch a la ruta /api/contact
+                const response = await fetch('/api/contact', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                // Convertir la respuesta a JSON
+                const result = await response.json();
+
+                if (response.ok) {
+                    // Si la respuesta es exitosa
+                    responseMessage.textContent = result.message;
+                    responseMessage.className = 'text-green-600 font-medium';
+                    form.reset(); // Limpiar el formulario
+                } else {
+                    // Si hay un error en la respuesta
+                    responseMessage.textContent = 'Error: ' + result.message;
+                    responseMessage.className = 'text-red-600 font-medium';
+                }
+
+            } catch (error) {
+                // Si hay un error en la conexión
+                console.error('Error en el fetch:', error);
+                responseMessage.textContent = 'Error de conexión con el servidor.';
+                responseMessage.className = 'text-red-600 font-medium';
+            }
+        });
+    </script>
+
+</body>
+</html>
+
